@@ -128,6 +128,8 @@
                         window.alert("添加用户成功！");
                         //更新页面
                         _this.findAll();
+                        //清空上一次保存的用户信息
+                    _this.user = {};
                     }else
                         window.alert("添加用户失败！");
                 }).catch(function (err) {

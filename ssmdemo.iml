@@ -8,6 +8,7 @@
         </descriptors>
         <webroots>
           <root url="file://$MODULE_DIR$/src/main/webapp" relative="/webapp/" />
+          <root url="file://$MODULE_DIR$/.git" relative="/" />
         </webroots>
         <sourceRoots />
       </configuration>

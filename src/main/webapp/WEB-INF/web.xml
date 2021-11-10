@@ -21,7 +21,7 @@
         <!--contextConfigLocation表示配置文件的位置-->
         <param-name>contextConfigLocation</param-name>
         <param-value>
-            classpath:src/ApplicationContext.xml
+            classpath:conf/ApplicationContext.xml
         </param-value>
     </context-param>
     <listener>
