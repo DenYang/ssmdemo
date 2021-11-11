@@ -35,13 +35,13 @@
                 <form class="form-inline">
                     <div class="form-group">
                         <label for="searchName">姓名：</label>
-                        <input type="text" class="form-control" id="searchName">
+                        <input type="text" class="form-control" v-model="searchName" id="searchName">
                     </div>
                     <div class="form-group">
                         <label for="searchEmail">邮箱：</label>
-                        <input type="email" class="form-control" id="searchEmail">
+                        <input type="email" class="form-control" v-model="searchEmail" id="searchEmail">
                     </div>
-                    <button type="submit" class="btn btn-info">搜索</button>
+                    <button type="button" class="btn btn-info" @click="search">搜索</button>
                 </form>
             </div>
         </div>
@@ -51,6 +51,7 @@
                 <!--用户信息展示-->
                 <table class="table table-striped table-bordered table-hover">
                     <tr>
+                        <th>用户编号</th>
                         <th>ID</th>
                         <th>姓名</th>
                         <th>密码</th>
@@ -60,13 +61,15 @@
                     </tr>
                     <tbody>
                     <tr v-for="user,index in users" :key="user.id">
+                        <td>{{ index+1 }}</td>
                         <td>{{ user.id }}</td>
                         <td>{{ user.name }}</td>
                         <td>{{ user.pwd }}</td>
                         <td>{{ user.email }}</td>
                         <td>{{ user.sex }}</td>
                         <td>
-                            <button class="btn btn-danger">删除</button>&nbsp;&nbsp;<button class="btn btn-primary">修改
+                            <button class="btn btn-danger" @click="delUser(user.id)">删除</button>&nbsp;&nbsp;
+                            <button class="btn btn-primary" @click="findOne(user.id)">修改
                         </button>
                         </td>
                     </tr>
@@ -93,7 +96,7 @@
                     </div>
 
                     <button type="button" class="btn btn-default" @click="saveUser">提交</button>
-                    <button type="reset" class="btn btn-danger">重置</button>
+                    <button type="reset" class="btn btn-danger" @click="resetUser">重置</button>
                 </form>
             </div>
         </div>
@@ -113,19 +116,28 @@
                 //{id:"13",name:"jialong",pwd:"123456",email:"jialong@163.com",sex:"男"}
             ],//数据赋值应该来源于后端接口，在页面加载完成之前完成赋值
             user:{},//用来完成用户对象的双向绑定
+            searchName:"",//用来处理搜索的对象绑定
+            searchEmail:"",
         },
         methods: {
             //保存用户信息
             saveUser(){
                 let _this = this;
-                axios.post('http://localhost:8989/myweb/user/adduser.do',{
-                    name:this.user.name,
-                    pwd:this.user.pwd,
-                    email:this.user.email,
-                    sex:this.user.sex
+                //判断输入信息是否为空
+                if (Object.keys(this)== null){
+                    console.log(Object.keys(this))
+                    window.alert("请输入完整用户信息！！");
+                }else
+                    axios.post('http://localhost:8989/myweb/user/adduser.do',{
+                        id:this.user.id,
+                        name:this.user.name,
+                        pwd:this.user.pwd,
+                        email:this.user.email,
+                        sex:this.user.sex
+
                 }).then(function (response) {
                     if (response.data === 'successes'){
-                        window.alert("添加用户成功！");
+                        window.alert("添加或修改用户成功！");
                         //更新页面
                         _this.findAll();
                         //清空上一次保存的用户信息
@@ -145,6 +157,46 @@
                 }).catch(function (err){
                     console.log(err);
                 });
+            },
+            //重置表单用户信息
+            resetUser(){
+                this.user = {};
+            },
+            //删除用户信息
+            delUser(id){
+                let _this = this;
+                if(window.confirm("是否删除此条记录？")){
+                    axios.get("http://localhost:8989/myweb/user/deluser.do?id="+id).then(function (response){
+                        if (response.data === 'successes'){
+                            window.alert("删除用户成功！");
+                            //更新页面
+                            _this.findAll();
+                            //清空上一次保存的用户信息
+                            _this.user = {};
+                        }else
+                            window.alert("删除用户失败！");
+                    }).catch(function (err) {
+                        console.log(err);
+                    })
+                }
+            },
+            //根据id查询一个用户的信息
+            findOne(id){
+                let _this = this;
+                //发送请求查询所有用户信息
+                axios.get("http://localhost:8989/myweb/user/findone.do?id="+id).then(function (response){
+                    _this.user = response.data;
+                    console.log(response.data);
+                }).catch(function (err){
+                    console.log(err);
+                });
+            },
+            //用来查询模糊搜索
+            search(){
+                let _this = this;
+                axios.get("http://localhost:8989/myweb/user/findlike.do?name="+_this.searchName+"&email="+_this.searchEmail).then(function (response) {
+                    _this.users = response.data;
+                })
             }
         },
         //生命周期相关函数
